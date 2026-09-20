@@ -11,10 +11,10 @@ type bannerData = {
 };
 
 const bannerImages: bannerData[] = [
-    {image: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/banners%2FDubai.png?alt=media&token=f105e607-ee4e-4a07-b013-30826f3a94ab', href: '/destination/dubai'},
-    {image: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/banners%2FMaldives.png?alt=media&token=790fa951-4161-433c-8d41-511572e6fc92', href: '/destination/maldives'},
-    {image: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/banners%2FThiland.png?alt=media&token=0329fb88-1101-4803-a22d-41b1162fc877', href: '/destination/thailand'},
-    {image: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/banners%2FVietnam.png?alt=media&token=2b769003-cc34-4224-bbac-7148c4f328c7', href: '/destination/vietnam'},
+    {image: '/banners/dubai.jpg', href: '/destination/dubai'},
+    {image: '/banners/maldives.jpg', href: '/destination/maldives'},
+    {image: '/banners/thailand.jpg', href: '/destination/thailand'},
+    {image: '/banners/vietnam.jpg', href: '/destination/vietnam'},
 ];
 
 export default function BannerSlideShow() {
