@@ -1,0 +1,2 @@
+Comment out "postbuild" command from package.json, to prevent sitemaps rebuilding.
+Else postbuild will run on each deployment

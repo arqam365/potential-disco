@@ -1,0 +1,11 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Host
+Host: https://packagefy.com
+
+# Sitemaps
+Sitemap: https://packagefy.com/sitemap.xml

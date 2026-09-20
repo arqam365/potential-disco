@@ -1,0 +1,37 @@
+@import 'ckeditor-tailwind-reset/ckeditor-tailwind-reset';
+
+
+@font-face {
+    font-family: 'Zasque';
+    src: url('/public/ZasquePersonalUseOnly-LVEzW.otf') format('opentype');
+    font-weight: auto;
+    font-style: auto;
+}
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+.testimonial-bg {
+    /*background: rgb(227,109,160);*/
+    /*background: linear-gradient(99deg, rgba(227,109,160,1) 0%, rgba(238,174,202,1) 16%, rgba(119,128,210,1) 47%, rgba(100,177,215,1) 72%, rgba(148,196,233,1) 100%);*/
+
+
+    /*background-color: #f9fcff;*/
+    /*background-image: linear-gradient(147deg, #2BC0E4 0%, #83a4d4 74%);*/
+
+    /*background-color: #f9fcff;*/
+    /*background-image: linear-gradient(147deg, #2C7744 0%, #11998e 74%);*/
+
+    background-color: #f9fcff;
+    background-image: linear-gradient(147deg, #141E30 0%, #243B55 74%);
+}
+
+.gradient-text {
+    background: linear-gradient(99deg, rgba(227,109,160,1) 0%, rgba(238,174,202,1) 16%, rgba(119,128,210,1) 47%, rgba(100,177,215,1) 72%, rgba(148,196,233,1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
