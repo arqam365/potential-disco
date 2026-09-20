@@ -18,7 +18,7 @@ export default function LogoCloud() {
                             className="max-h-40 scale-125 md:max-h-60 lg:scale-100"
                             width={1000}
                             height={1000}
-                            src="https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/rise_logo.jpg?alt=media&token=82cb8f55-116a-40f4-baf8-0ce2e85866a0"
+                            src="/placeholder-logo.png"
                             alt="Rise Jhansi"
                         />
                     </div>
@@ -33,14 +33,14 @@ export default function LogoCloud() {
                         <Image className="max-h-40 scale-125 lg:max-h-60 lg:scale-90"
                                width={404}
                                height={316}
-                               src="https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/uptourism_logo.jpg?alt=media&token=167c1c62-0107-4444-a002-c0b03a48cc29"
+                               src="/placeholder-logo.png"
                                alt="Up Tourism"/>
                     </div>
                     <div className="col-span-1 flex justify-center py-8 px-8 content-center items-center">
                         <Image className="max-h-40 scale-125 md:max-h-32 lg:scale-100"
                                width={521}
                                height={150}
-                               src="https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/startup%20india%20logo.png?alt=media&token=a0af8446-c1c2-4a37-9865-bb3dfffb9dfb"
+                               src="/placeholder-logo.png"
                                alt="Startup India logo"/>
                     </div>
 
@@ -49,7 +49,7 @@ export default function LogoCloud() {
                         <img className="max-h-40 scale-125 md:max-h-32 lg:scale-100"
                              width={521}
                              height={150}
-                             src="https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/MP%20TOurism%20logo.svg?alt=media&token=309c6c2e-f836-4559-876a-2636b866d2c6"
+                             src="/placeholder-logo.png"
                              alt="MP Tourism Logo"/>
                     </div>
 
@@ -58,7 +58,7 @@ export default function LogoCloud() {
                              width={1000}
                              height={750}
                             // fill={true} objectFit={'cover'}
-                               src="https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/Incredible-India-Black.svg?alt=media&token=d4f2da28-e2f0-44d3-99b2-582389c38c2f"
+                               src="/placeholder-logo.png"
                              alt="Incredible India Logo"/>
                     </div>
 

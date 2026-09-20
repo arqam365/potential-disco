@@ -17,74 +17,60 @@ const content: ImageGridProps[] = [
 
     // INTERNATIONAL
     // BIG IMAGE 1 (index 0)
-    {src: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/SlidingGrids%2Fdubai.jpg?alt=media&token=7949700e-3c5f-476c-ad9e-bcf5addd5c54',
+    {src: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1200&q=80',
         alt: 'Dubai', title: 'Dubai', link: '/destination/dubai'},
 
+    {src: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=1200&q=80',
+        alt: 'Thailand', title: 'Thailand', link: '/destination/thailand'},
 
-    {src: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/SlidingGrids%2Fthiland.jpg?alt=media&token=a8e66ef7-7009-41bf-9354-4cd8abb04954',
-        alt: 'Thailand',
-        title: 'Thailand',
-        link: '/destination/thailand'},
+    {src: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=1200&q=80',
+        alt: 'Vietnam', title: 'Vietnam', link: '/destination/vietnam'},
 
-
-    {src: 'https://images.unsplash.com/photo-1528127269322-539801943592',
-        alt: 'Vietnam',
-        title: 'Vietnam',
-        link: '/destination/vietnam'},
-
-    {src: 'https://images.pexels.com/photos/11807186/pexels-photo-11807186.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    {src: 'https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=1200&q=80',
         alt: 'Maldives', title: 'Maldives', link: '/destination/maldives'},
 
-    {src: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/SlidingGrids%2Fbali.jpg?alt=media&token=a13b58e7-f5f8-4296-a58c-d8af727a48df',
+    {src: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1200&q=80',
         alt: 'Bali', title: 'Bali', link: '/destination/bali'},
 
-
-
-    {src: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/SlidingGrids%2Fbhutan.jpg?alt=media&token=eb6083b5-f591-4c19-a01c-a6b88edeed0a',
+    {src: 'https://images.unsplash.com/photo-1553856622-d1b352e9a211?w=1200&q=80',
         alt: 'Bhutan', title: 'Bhutan', link: '/destination/bhutan'},
 
-    {src: 'https://images.pexels.com/photos/22804/pexels-photo.jpg?cs=srgb&dl=pexels-umaraffan499-22804.jpg&fm=jpg&w=1920&h=1280&_gl=1*1dmdfp1*_ga*NDk5ODIxODA4LjE3MjMyNjY0OTc.*_ga_8JE65Q40S6*MTcyMzI3MjI1MS4yLjEuMTcyMzI3MjgyMC4wLjAuMA..',
+    {src: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1200&q=80',
         alt: 'Malaysia', title: 'Malaysia', link: '/destination/malaysia'},
 
-    {src: 'https://images.pexels.com/photos/1029188/pexels-photo-1029188.jpeg?cs=srgb&dl=pexels-alaric-sim-380461-1029188.jpg&fm=jpg&w=1920&h=1260&_gl=1*802eay*_ga*NDk5ODIxODA4LjE3MjMyNjY0OTc.*_ga_8JE65Q40S6*MTcyMzI3MjI1MS4yLjEuMTcyMzI3MjUxMi4wLjAuMA..',
+    {src: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=1200&q=80',
         alt: 'Singapore', title: 'Singapore', link: '/destination/singapore'},
 
-    {src: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/SlidingGrids%2Fazerbijan.jpg?alt=media&token=5712f5ed-27f4-41e6-9568-3ea4e4cde6a2',
-        alt: 'Azerbaizan', title: 'Azerbaizan', link: '/destination/azerbaizan'},
-
-
+    {src: 'https://images.unsplash.com/photo-1580274455191-1c62238fa1c2?w=1200&q=80',
+        alt: 'Azerbaijan', title: 'Azerbaijan', link: '/destination/azerbaizan'},
 
     // DOMESTIC
     // BIG IMAGE 2 (index 9)
-    {src: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/SlidingGrids%2Fkerala.jpg?alt=media&token=1f93f0a6-9d91-41b1-94a7-bd8600abe200',
+    {src: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1200&q=80',
         alt: 'Kerala', title: 'Kerala', link: '/destination/kerala'},
 
+    {src: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=1200&q=80',
+        alt: 'Himachal Pradesh', title: 'Himachal Pradesh', link: '/destination/himachalpradesh'},
 
-    {src: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/SlidingGrids%2FHimachal.jpg?alt=media&token=c33a63a7-95c1-4ae4-936d-df67b5111d3c',
-        alt: 'Himachal Pradesh ', title: 'Himachal Pradesh ', link: '/destination/himachalpradesh'},
-
-    {src: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/SlidingGrids%2Fgoa.jpg?alt=media&token=8b3b1bd8-5b4c-4762-82c8-15b8e3280df6',
+    {src: 'https://images.unsplash.com/photo-1587922546307-776227941871?w=1200&q=80',
         alt: 'Goa', title: 'Goa', link: '/destination/goa'},
 
+    {src: 'https://images.unsplash.com/photo-1506461883276-594a12b5bca3?w=1200&q=80',
+        alt: 'Meghalaya', title: 'Meghalaya', link: '/destination/meghalaya'},
 
-    {src: 'https://images.pexels.com/photos/25527013/pexels-photo-25527013.jpeg?cs=srgb&dl=pexels-pth686817-25527013.jpg&fm=jpg&w=1280&h=960&_gl=1*g8euip*_ga*NDk5ODIxODA4LjE3MjMyNjY0OTc.*_ga_8JE65Q40S6*MTcyMzI2NjQ5Ni4xLjEuMTcyMzI2NjU4NS4wLjAuMA..',
-        alt: 'Meghalaya ', title: 'Meghalaya', link: '/destination/meghalaya'},
-
-    {src: 'https://images.pexels.com/photos/7084186/pexels-photo-7084186.jpeg?cs=srgb&dl=pexels-lachlan-ross-7084186.jpg&fm=jpg&w=1920&h=1280&_gl=1*15c66so*_ga*NDk5ODIxODA4LjE3MjMyNjY0OTc.*_ga_8JE65Q40S6*MTcyMzI2NjQ5Ni4xLjEuMTcyMzI2Njc1Mi4wLjAuMA..',
+    {src: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1200&q=80',
         alt: 'Andaman', title: 'Andaman', link: '/destination/andaman'},
 
-    {src: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/SlidingGrids%2FJammu%20%26%20Kashmir.jpg?alt=media&token=c05c5f29-0016-4667-9034-31fff8bf43bc',
-        alt: 'Jammu & Kashmir ', title: 'Kashmir ', link: '/destination/kashmir'},
+    {src: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=1200&q=80',
+        alt: 'Jammu & Kashmir', title: 'Kashmir', link: '/destination/kashmir'},
 
-    {src: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/SlidingGrids%2Futtarakhand.jpg?alt=media&token=3a99a9b8-42ed-4de3-a876-d84d1c6562a1',
+    {src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80',
         alt: 'Uttrakhand', title: 'Uttrakhand', link: '/destination/uttrakhand'},
-    {
-        src: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/SlidingGrids%2Frajasthan.jpg?alt=media&token=117aa3f6-7262-4ced-8f8f-94e97c846104',
-        alt: 'Rajasthan',
-        title: 'Rajasthan',
-        link: '/destination/rajasthan'
-    },
-    {src: 'https://images.pexels.com/photos/1107717/pexels-photo-1107717.jpeg?cs=srgb&dl=pexels-fotios-photos-1107717.jpg&fm=jpg&w=1920&h=1280&_gl=1*1pnhway*_ga*NDk5ODIxODA4LjE3MjMyNjY0OTc.*_ga_8JE65Q40S6*MTcyMzI2NjQ5Ni4xLjEuMTcyMzI2NzA5NS4wLjAuMA..',
+
+    {src: 'https://images.unsplash.com/photo-1477587458883-47145ed31fd0?w=1200&q=80',
+        alt: 'Rajasthan', title: 'Rajasthan', link: '/destination/rajasthan'},
+
+    {src: 'https://images.unsplash.com/photo-1504274066651-8d31a536b11a?w=1200&q=80',
         alt: 'North East', title: 'North East', link: '/destination/northeast'},
 ]
 

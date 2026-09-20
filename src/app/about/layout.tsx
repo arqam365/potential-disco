@@ -8,7 +8,7 @@ export const metadata: Metadata = {
         "to a diverse range of customers to maximize its market reach and appeal." +
         "This includes:  Leisure Travelers, Business Travelers, Adventure Seekers, Budget-conscious Travelers Offering affordable options, Honeymooners, Educational Student tours.",
     icons: {
-        icon: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/resources%2Fnewlogo.svg?alt=media&token=833503db-fc0a-4385-9779-58abdd059d78',
+        icon: '/favicon.ico',
     },
     applicationName : 'Packagefy.com Website',
     openGraph : {
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
             "solution for all your travel needs. We make travel better and easier for people of India. Packagefy ideally caters " +
             "to a diverse range of customers to maximize its market reach and appeal." +
             "This includes:  Leisure Travelers, Business Travelers, Adventure Seekers, Budget-conscious Travelers Offering affordable options, Honeymooners, Educational Student tours.",
-        images: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/resources%2Fbgblacklogo.png?alt=media&token=ab89b1ba-1e66-48a4-93a6-f2cc7a40beb1',
+        images: '/og-image.jpg',
         type: 'website',
         siteName: 'Packagefy'
     },
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
             "solution for all your travel needs. We make travel better and easier for people of India. Packagefy ideally caters " +
             "to a diverse range of customers to maximize its market reach and appeal." +
             "This includes:  Leisure Travelers, Business Travelers, Adventure Seekers, Budget-conscious Travelers Offering affordable options, Honeymooners, Educational Student tours.",
-        images: 'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/resources%2Fbgblacklogo.png?alt=media&token=ab89b1ba-1e66-48a4-93a6-f2cc7a40beb1',
+        images: '/og-image.jpg',
         creator: 'packagefy',
         creatorId: 'packagefy',
     },

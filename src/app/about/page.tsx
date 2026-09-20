@@ -51,7 +51,7 @@ const About1 = () => {
                                                 <div className="py-3 sm:py-4">
                                                     {/* You can add an image of your suspension product here */}
                                                     <Image
-                                                        src={"https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2FGroup%20image%20vertical%202.jpg?alt=media&token=2d4a7604-137d-444d-ad86-b573d6923524"}
+                                                        src={"https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=80"}
                                                         objectFit={'cover'}
                                                         width={1000}
                                                         height={1000}
@@ -62,7 +62,7 @@ const About1 = () => {
                                                 <div className="py-3 sm:py-4">
                                                     {/* You can add a video showcasing your product here */}
                                                     <Image
-                                                        src="https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2Fimage%203.jpg?alt=media&token=7e3f38bf-d048-4612-b5d0-bb340492e90d"
+                                                        src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&q=80"
                                                         className="w-full rounded-2xl"
                                                         alt={"Trip image"}
                                                         objectFit={'cover'}
@@ -75,7 +75,7 @@ const About1 = () => {
                                                 <div className="relative z-10 my-4">
                                                     {/* You can add another image or illustration here */}
                                                     <Image
-                                                        src="https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2FGroup%20Image%20vertical%201.jpg?alt=media&token=0b1f3278-bda6-4c98-b1da-cd73d8d6042d"
+                                                        src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=80"
                                                         className="w-full rounded-2xl"
                                                         alt={"Trip image"}
                                                         objectFit={'cover'}
@@ -119,7 +119,7 @@ const About1 = () => {
                             <div className="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
                                 <div className="aspect-w-16 aspect-h-7">
                                     <Image className="w-full object-cover rounded-xl"
-                                         src="https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2FSlideshow%2FBig%20Group%20image.jpg?alt=media&token=8c8d1321-013c-40de-bbbc-acfe2ab1c8c4"
+                                         src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&q=80"
                                          alt={"Trip image"}
                                          objectFit={'cover'}
                                          width={1000}
@@ -261,7 +261,7 @@ const people = [
         name: 'Sajid Khan',
         role: 'Founder',
         imageUrl:
-            'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2Fteam%20images%2Fsajid%20founder.jpg?alt=media&token=3fb5f23f-22c5-4416-94f9-fb67bc33d7b4',
+            'https://ui-avatars.com/api/?name=Sajid+Khan&background=008DDA&color=fff&size=200',
         // twitterUrl: '#',
         linkedinUrl: 'https://www.linkedin.com/in/mohd-sajid-691540167/',
     },
@@ -269,7 +269,7 @@ const people = [
         name: 'Abdul Shadab',
         role: 'Co Founder',
         imageUrl:
-            'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2Fteam%20images%2Fabdul%20Shadab%20co%20founder.jpg?alt=media&token=44ee4e8e-91b4-48a1-944f-154a4fcd018c',
+            'https://ui-avatars.com/api/?name=Abdul+Shadab&background=008DDA&color=fff&size=200',
         // twitterUrl: '#',
         // linkedinUrl: '#',
     },
@@ -277,7 +277,7 @@ const people = [
         name: 'Vivek Pandey',
         role: 'Human Resources Head',
         imageUrl:
-            'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2Fteam%20images%2FVivek%20HR%20Head.JPG?alt=media&token=035c5beb-a6f5-44f6-b447-4462b9e5127a',
+            'https://ui-avatars.com/api/?name=Vivek+Pandey&background=008DDA&color=fff&size=200',
         // twitterUrl: '#',
         // linkedinUrl: '#',
     },
@@ -285,7 +285,7 @@ const people = [
         name: 'Mohd. Irfan',
         role: 'Chief customer officer',
         imageUrl:
-            'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2Fteam%20images%2Fmohd.%20irfan%2C%20chief%20customer%20officer.jpg?alt=media&token=c441fb74-8e33-47ae-bd9d-0e4fcd1465dc',
+            'https://ui-avatars.com/api/?name=Mohd+Irfan&background=008DDA&color=fff&size=200',
         // twitterUrl: '#',
         // linkedinUrl: '#',
     },
@@ -294,7 +294,7 @@ const people = [
         name: 'Mayank Prasad',
         role: 'Head of Content',
         imageUrl:
-            'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2Fteam%20images%2Fmayank%20head%20of%20content.jpg?alt=media&token=3f1de345-1677-49bd-b2fb-2e0b344f389d',
+            'https://ui-avatars.com/api/?name=Mayank+Prasad&background=008DDA&color=fff&size=200',
         // twitterUrl: '#',
         // linkedinUrl: '#',
     },
@@ -303,7 +303,7 @@ const people = [
         name: 'Irfan khan',
         role: 'Head of Operations',
         imageUrl:
-            'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2Fteam%20images%2Firfan%20khan%20Head%20of%20operations.JPG?alt=media&token=82705dd5-796f-406f-b9ed-f5e5aade3e9a',
+            'https://ui-avatars.com/api/?name=Irfan+Khan&background=008DDA&color=fff&size=200',
         // twitterUrl: '#',
         // linkedinUrl: '#',
     },
@@ -311,7 +311,7 @@ const people = [
         name: 'Raj Dwivedi',
         role: 'Lead Developer',
         imageUrl:
-            'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2Fteam%20images%2F20231230_103904.jpg?alt=media&token=d9042298-7c38-4ce4-8ca8-b20f9660c990',
+            'https://ui-avatars.com/api/?name=Raj+Dwivedi&background=008DDA&color=fff&size=200',
         // twitterUrl: '#',
         linkedinUrl: 'https://www.linkedin.com/in/badenforcer/',
     },
@@ -320,7 +320,7 @@ const people = [
         name: 'Arqam Ahmad Siddiqui',
         role: 'QA Head',
         imageUrl:
-            'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/about%20us%20content%2Fteam%20images%2Farqam%20QA.png?alt=media&token=75da6ce2-663b-49ff-a96a-feb6435e0e2d',
+            'https://ui-avatars.com/api/?name=Arqam+Siddiqui&background=008DDA&color=fff&size=200',
         // twitterUrl: '#',
         linkedinUrl: 'https://www.linkedin.com/in/arqam365/',
     },

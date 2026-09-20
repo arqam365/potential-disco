@@ -9,7 +9,7 @@ export default function Err404() {
                             <span className="sr-only">Packagefy</span>
                             <img
                                 className="h-16 w-auto"
-                                src={'https://firebasestorage.googleapis.com/v0/b/packagefy.appspot.com/o/resources%2Fnewlogo.svg?alt=media&token=833503db-fc0a-4385-9779-58abdd059d78'}
+                                src={'/logo.svg'}
                                 alt="Packagefy"
                             />
                         </a>
