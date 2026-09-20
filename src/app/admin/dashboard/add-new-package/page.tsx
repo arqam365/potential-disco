@@ -32,6 +32,8 @@ export default function AddNewPackagePage() {
     const [packageId, setPackageId] = useState<string>('');
     const [packageName, setPackageName] = useState<string>('');
     const [packageDescription, setPackageDescription] = useState<string>('');
+    const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+    const [coverImagePreview, setCoverImagePreview] = useState<string>('');
     const [coverImageUrl, setCoverImageUrl] = useState<string>('');
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [originalPrice, setOriginalPrice] = useState<number>(0);
@@ -68,7 +70,7 @@ export default function AddNewPackagePage() {
         e.preventDefault();
 
 
-        if (!destinationId || !packageId || !packageName || !packageDescription || !packageDescription.trim().length || !coverImageUrl || !pickUpAndDropSpot || !packageDuration) {
+        if (!destinationId || !packageId || !packageName || !packageDescription || !packageDescription.trim().length || !coverImageFile || !pickUpAndDropSpot || !packageDuration) {
             toast.info('Please fill all required fields correctly.');
             return;
         }
@@ -85,6 +87,13 @@ export default function AddNewPackagePage() {
 
 
         try {
+            toast.info("Uploading image...")
+            const formData = new FormData()
+            formData.append("file", coverImageFile)
+            const uploadRes = await axios.post("/api/upload", formData)
+            const uploadedUrl = uploadRes.data.url
+            setCoverImageUrl(uploadedUrl)
+
             // Start transaction
             await runTransaction(firebase.db, async (transaction) => {
                 // Check if DestinationId is valid and DataItem exists
@@ -114,19 +123,11 @@ export default function AddNewPackagePage() {
                     }
                 })
 
-                const res = await axios.post('/api/getBase64', JSON.stringify({imageUrl: coverImageUrl}), {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                const base64 = res.data.base64
-
-
                 availablePackages.push({
                     id: packageId,
                     name: packageName,
-                    coverImageUrl: coverImageUrl,
-                    coverImageFilename: coverImageUrl,
+                    coverImageUrl: uploadedUrl,
+                    coverImageFilename: uploadedUrl,
                     duration: packageDuration,
                     pickupAndDropLocation: pickUpAndDropSpot,
                     originalPrice: originalPrice,
@@ -135,7 +136,7 @@ export default function AddNewPackagePage() {
                     itinerary: itineraryData,
                     inclusions: inclusions,
                     exclusions: exclusions,
-                    coverImageBase64: base64,
+                    coverImageBase64: "",
                     reviews: reviewsData
                 } as Package)
 
@@ -440,27 +441,29 @@ export default function AddNewPackagePage() {
                                     </p>
                                 </div>
 
-                                {/*Cover Image URL*/}
+                                {/*Cover Image*/}
                                 <div className="col-span-full">
-                                    <label htmlFor="cover-image-url" className="block text-sm font-medium leading-6 text-gray-900">
-                                        Cover Image URL
+                                    <label htmlFor="cover-image-file" className="block text-sm font-medium leading-6 text-gray-900">
+                                        Cover Image
                                     </label>
                                     <div className="mt-2">
                                         <input
-                                            type="url"
-                                            id="cover-image-url"
-                                            name="cover-image-url"
+                                            type="file"
+                                            id="cover-image-file"
+                                            name="cover-image-file"
+                                            accept="image/*"
                                             required
-                                            value={coverImageUrl}
-                                            onChange={(e) => setCoverImageUrl(e.target.value)}
-                                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6"
-                                            placeholder="https://images.unsplash.com/photo-..."
+                                            className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0] ?? null
+                                                setCoverImageFile(file)
+                                                setCoverImagePreview(file ? URL.createObjectURL(file) : "")
+                                            }}
                                         />
                                     </div>
-                                    <p className="mt-3 text-sm leading-6 text-gray-600">Paste a public image URL from Unsplash, Pexels, etc.</p>
-                                    {coverImageUrl && (
-                                        <img src={coverImageUrl} alt="Preview" className="mt-3 h-40 w-full object-cover rounded-md"
-                                             onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
+                                    <p className="mt-3 text-sm leading-6 text-gray-600">Select an image file to upload as the cover photo.</p>
+                                    {coverImagePreview && (
+                                        <img src={coverImagePreview} alt="Preview" className="mt-3 h-40 w-full object-cover rounded-md" />
                                     )}
                                 </div>
 
@@ -932,7 +935,7 @@ export default function AddNewPackagePage() {
                             type="submit"
                             className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 disabled:bg-opacity-30"
                         >
-                            Submit
+                            {isProcessing ? "Uploading..." : "Submit"}
                         </button>
                     </div>
                 </form>

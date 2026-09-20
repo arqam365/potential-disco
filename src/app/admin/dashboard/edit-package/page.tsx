@@ -40,6 +40,8 @@ export default function ModifyDestinationPage() {
     const [packageName, setPackageName] = useState<string>('');
     const [packageDescription, setPackageDescription] = useState<string>('');
     const [coverImageUrl, setCoverImageUrl] = useState<string>('');
+    const [newCoverImageFile, setNewCoverImageFile] = useState<File | null>(null);
+    const [newCoverImagePreview, setNewCoverImagePreview] = useState<string>('');
     const [originalPrice, setOriginalPrice] = useState<number>(0);
     const [discountedPrice, setDiscountedPrice] = useState<number>(0);
     const [exclusions, setExclusions] = useState<string[]>([]);
@@ -154,13 +156,15 @@ export default function ModifyDestinationPage() {
 
         setIsProcessing(true)
         try {
-            let newCoverImageUrl = coverImageUrl
+            let finalCoverImageUrl = coverImageUrl
             let base64 = fetchedPackageData.coverImageBase64
-            if (coverImageUrl !== fetchedPackageData.coverImageUrl) {
-                const res = await axios.post('/api/getBase64', JSON.stringify({ imageUrl: coverImageUrl }), {
-                    headers: { 'Content-Type': 'application/json' }
-                })
-                base64 = res.data.base64
+            if (newCoverImageFile) {
+                toast.info("Uploading image...")
+                const formData = new FormData()
+                formData.append("file", newCoverImageFile)
+                const uploadRes = await axios.post("/api/upload", formData)
+                finalCoverImageUrl = uploadRes.data.url
+                base64 = ""
             }
 
             // update the package
@@ -187,8 +191,8 @@ export default function ModifyDestinationPage() {
                     description: packageDescription,
                     duration: packageDuration,
                     pickupAndDropLocation: pickUpAndDropSpot,
-                    coverImageUrl: newCoverImageUrl,
-                    coverImageFilename: newCoverImageUrl,
+                    coverImageUrl: finalCoverImageUrl,
+                    coverImageFilename: finalCoverImageUrl,
                     coverImageBase64: base64,
                     originalPrice: originalPrice,
                     discountedPrice: discountedPrice,
@@ -572,27 +576,32 @@ export default function ModifyDestinationPage() {
                                     </p>
                                 </div>
 
-                                {/*Cover Image URL*/}
+                                {/*Cover Image*/}
                                 <div className="col-span-full">
-                                    <label htmlFor="cover-image-url" className="block text-sm font-medium leading-6 text-gray-900">
-                                        Cover Image URL
+                                    <label htmlFor="new-cover-image-file" className="block text-sm font-medium leading-6 text-gray-900">
+                                        Cover Image (optional to update)
                                     </label>
+                                    {coverImageUrl && !newCoverImagePreview && (
+                                        <img src={coverImageUrl} alt="Current cover" className="mt-2 h-40 w-full object-cover rounded-md"
+                                             onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
+                                    )}
                                     <div className="mt-2">
                                         <input
-                                            type="url"
-                                            id="cover-image-url"
-                                            name="cover-image-url"
-                                            required={!coverImageUrl && !!fetchedPackageData}
-                                            value={coverImageUrl}
-                                            onChange={(e) => setCoverImageUrl(e.target.value)}
-                                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6"
-                                            placeholder="https://images.unsplash.com/photo-..."
+                                            type="file"
+                                            id="new-cover-image-file"
+                                            name="new-cover-image-file"
+                                            accept="image/*"
+                                            className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0] ?? null
+                                                setNewCoverImageFile(file)
+                                                setNewCoverImagePreview(file ? URL.createObjectURL(file) : "")
+                                            }}
                                         />
                                     </div>
-                                    <p className="mt-3 text-sm leading-6 text-gray-600">Paste a public image URL from Unsplash, Pexels, etc.</p>
-                                    {coverImageUrl && (
-                                        <img src={coverImageUrl} alt="Preview" className="mt-3 h-40 w-full object-cover rounded-md"
-                                             onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
+                                    <p className="mt-2 text-sm text-gray-500">Leave blank to keep current image.</p>
+                                    {newCoverImagePreview && (
+                                        <img src={newCoverImagePreview} alt="New cover preview" className="mt-3 h-40 w-full object-cover rounded-md" />
                                     )}
                                 </div>
 
@@ -1091,7 +1100,7 @@ export default function ModifyDestinationPage() {
                             type="submit"
                             className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-opacity-30"
                         >
-                            Submit
+                            {isProcessing ? "Uploading..." : "Submit"}
                         </button>
                     </div>
                 </form>}

@@ -24,6 +24,8 @@ export default function AddNewDestinationPage() {
     const [destinationId, setDestinationId] = useState<string>("")
     const [destinationName, setDestinationName] = useState<string>("")
     const [destinationDescription, setDestinationDescription] = useState<string>("")
+    const [coverImageFile, setCoverImageFile] = useState<File | null>(null)
+    const [coverImagePreview, setCoverImagePreview] = useState<string>("")
     const [coverImageUrl, setCoverImageUrl] = useState<string>("")
     const [isProcessing, setIsProcessing] = useState<boolean>(false)
 
@@ -39,7 +41,7 @@ export default function AddNewDestinationPage() {
     async function handleNewDestination(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
 
-        if (!destinationId || !destinationName || !destinationDescription.trim() || !coverImageUrl.trim()) {
+        if (!destinationId || !destinationName || !destinationDescription.trim() || !coverImageFile) {
             toast.info("Please fill all required fields correctly.")
             return
         }
@@ -54,13 +56,13 @@ export default function AddNewDestinationPage() {
                 return
             }
 
-            toast.info("Generating image preview...")
-            const res = await axios.post(
-                "/api/getBase64",
-                JSON.stringify({ imageUrl: coverImageUrl }),
-                { headers: { "Content-Type": "application/json" } }
-            )
-            const base64 = res.data.base64
+            toast.info("Uploading image...")
+            const formData = new FormData()
+            formData.append("file", coverImageFile)
+            const uploadRes = await axios.post("/api/upload", formData)
+            const uploadedUrl = uploadRes.data.url
+            setCoverImageUrl(uploadedUrl)
+            const base64 = ""
 
             const searchListRef = doc(firebase.db, "search", "list")
             await runTransaction(firebase.db, async (transaction) => {
@@ -84,7 +86,7 @@ export default function AddNewDestinationPage() {
                     id: destinationId.toLowerCase(),
                     name: destinationName,
                     description: destinationDescription,
-                    coverImageUrl: coverImageUrl,
+                    coverImageUrl: uploadedUrl,
                     coverImageBase64: base64,
                     coverImageFilename: destinationId.toLowerCase(),
                     packages: [],
@@ -190,32 +192,32 @@ export default function AddNewDestinationPage() {
                                 </div>
 
                                 <div className="col-span-full">
-                                    <label htmlFor="cover-image-url" className="block text-sm font-medium leading-6 text-gray-900">
-                                        Cover Image URL
+                                    <label htmlFor="cover-image-file" className="block text-sm font-medium leading-6 text-gray-900">
+                                        Cover Image
                                     </label>
                                     <div className="mt-2">
                                         <input
-                                            type="url"
-                                            id="cover-image-url"
-                                            name="cover-image-url"
+                                            type="file"
+                                            id="cover-image-file"
+                                            name="cover-image-file"
+                                            accept="image/*"
                                             required
-                                            value={coverImageUrl}
-                                            onChange={(e) => setCoverImageUrl(e.target.value)}
-                                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6"
-                                            placeholder="https://images.unsplash.com/photo-..."
+                                            className="block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0] ?? null
+                                                setCoverImageFile(file)
+                                                setCoverImagePreview(file ? URL.createObjectURL(file) : "")
+                                            }}
                                         />
                                     </div>
                                     <p className="mt-3 text-sm leading-6 text-gray-600">
-                                        Paste an image URL from Unsplash, Pexels, or any public image host.
+                                        Select an image file to upload as the cover photo.
                                     </p>
-                                    {coverImageUrl && (
+                                    {coverImagePreview && (
                                         <img
-                                            src={coverImageUrl}
+                                            src={coverImagePreview}
                                             alt="Preview"
                                             className="mt-3 h-40 w-full object-cover rounded-md"
-                                            onError={(e) => {
-                                                (e.target as HTMLImageElement).style.display = "none"
-                                            }}
                                         />
                                     )}
                                 </div>
@@ -236,7 +238,7 @@ export default function AddNewDestinationPage() {
                             type="submit"
                             className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 disabled:bg-opacity-30"
                         >
-                            Submit
+                            {isProcessing ? "Uploading..." : "Submit"}
                         </button>
                     </div>
                 </form>

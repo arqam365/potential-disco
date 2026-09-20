@@ -13,6 +13,8 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1136.0",
+    "@aws-sdk/s3-request-presigner": "^3.1136.0",
     "@ckeditor/ckeditor5-react": "^8.0.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
@@ -31,6 +33,7 @@
     "ckeditor-tailwind-reset": "^1.0.5",
     "ckeditor5": "^42.0.0",
     "dompurify": "^3.1.6",
+    "dotenv": "^18.0.1",
     "drizzle-orm": "^0.45.2",
     "embla-carousel-autoplay": "^8.1.6",
     "embla-carousel-react": "^8.1.6",
