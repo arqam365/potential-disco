@@ -3,7 +3,6 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { getDb } from "./db"
 import * as schema from "./db/schema"
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _auth: any
 
 export function getAuth() {
