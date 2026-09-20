@@ -1,11 +1,8 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import firebase from "../../../firebase.ts";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
-import { DestinationData } from "@/app/_utility/types";
 import { ComboboxInput } from "@headlessui/react";
 import SpinnerFullScreen from "@/app/components/FullScreenSpinner.tsx";
 
@@ -18,50 +15,31 @@ function classNames(...classes: (string | boolean)[]) {
     return classes.filter(Boolean).join(' ');
 }
 
+type SearchResult = { id: string; destinationId: string; destinationName: string };
+
 export default function HeroSearch() {
     const [isLoading, setIsLoading] = React.useState(true);
-    const [destinations, setDestinations] = React.useState<DestinationData[]>([]);
+    const [destinations, setDestinations] = React.useState<SearchResult[]>([]);
     const router = useRouter();
     const [query, setQuery] = React.useState('');
 
     useEffect(() => {
-        const fetchDestinations = async () => {
-            const destinationsCollection = collection(firebase.db, "destinations");
-            try {
-                const querySnapshot = await getDocs(destinationsCollection);
-                const allDestinations: DestinationData[] = [];
-                querySnapshot.forEach((doc) => {
-                    const destination = doc.data() as DestinationData;
-
-                    // Log destination data to verify structure
-                    console.log('Destination data:', destination);
-
-                    allDestinations.push(destination);
-                });
-                setDestinations(allDestinations);
+        fetch("/api/search")
+            .then((res) => res.json())
+            .then((data: SearchResult[]) => {
+                setDestinations(data);
                 setIsLoading(false);
-            } catch (err) {
+            })
+            .catch(() => {
                 setIsLoading(false);
                 toast.error("Search has crashed");
                 toast.info("Request rejected by server.");
-            }
-        };
-        fetchDestinations().then(() => {});
+            });
     }, []);
 
-    // Filter destinations and packages based on query
-    const filteredResults = query === '' ? [] : destinations.flatMap((destination) => {
-        const matchingPackages = destination.packages.filter(pkg =>
-            pkg.name.toLowerCase().includes(query.toLowerCase())
-        );
-        const destinationMatches = destination.name?.toLowerCase().includes(query.toLowerCase());
-
-        // Ensure destinationId is explicitly included
-        return [
-            ...(destinationMatches ? [{ type: 'destination', destinationId: destination.id, ...destination }] : []),
-            ...matchingPackages.map(pkg => ({ type: 'package', destinationId: destination.id, ...pkg }))
-        ];
-    });
+    const filteredResults = query === '' ? [] : destinations
+        .filter((d) => d.destinationName?.toLowerCase().includes(query.toLowerCase()))
+        .map((d) => ({ type: 'destination', destinationId: d.destinationId, name: d.destinationName }));
 
     const handleSelection = (item: any) => {
         setIsLoading(true);

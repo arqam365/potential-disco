@@ -2,47 +2,13 @@
 
 import React, {useEffect, useState} from "react";
 import {toast} from "react-toastify";
-import {doc, runTransaction} from "firebase/firestore";
-import firebase from "../../../../../firebase.ts";
 import {useRouter} from "next/navigation";
 
 import dynamic from 'next/dynamic';
-import {PackageShowcaseDataFile} from "@/app/_utility/types";
 import {useSession} from "@/lib/auth-client";
 
 const Footer = dynamic(() => import('@/app/components/Footer'));
 const ToastContainer = dynamic(() => import("react-toastify").then(mod => mod.ToastContainer));
-
-
-type Package = {
-    id: string
-    name: string
-    coverImageUrl: string
-    coverImageFilename: string, originalPrice: number
-    discountedPrice: number
-    description: string
-    duration: string, pickupAndDropLocation: string, itinerary: {
-        id: string, heading: string, description: string,
-    }[] | []
-    inclusions: string[] | []
-    exclusions: string[] | []
-}
-
-
-interface DestinationData {
-    id: string,
-    name: string,
-    description: string,
-    coverImageUrl: string,
-    packages: Package[] | [],
-    fileName: string,
-    created: Date,
-    modified: Date,
-    version: number,
-    modificationInfo: {
-        createdBy: string, lastModifiedBy: string
-    }
-}
 
 
 export default function ModifyDestinationPage() {
@@ -67,76 +33,25 @@ export default function ModifyDestinationPage() {
             return;
         }
 
-        setIsProcessing(true) // disable button
+        setIsProcessing(true)
 
         try {
-            // start transaction
-            await runTransaction(firebase.db, async (transaction) => {
-                // get destination document
-                const destinationRef = doc(firebase.db, "destinations", destinationId);
-                const destinationSnapshot = await transaction.get(destinationRef);
-                const trendingPackagesRef = doc(firebase.db, "homepage", "trendingPackages");
-                //fetch data
-                const trendingPackagesSnapshot = await transaction.get(trendingPackagesRef);
-
-                if (!destinationSnapshot.exists()) { // if it does not exist
-                    setIsProcessing(false);
-                    throw new Error("No Destination Found using the given ID");
-                }
-
-                let destinationData = destinationSnapshot.data() as DestinationData;
-                let availablePackages = destinationData.packages;
-
-                if (availablePackages.length === 0) { // if length is 0
-                    toast.info("This destinations has no packages.");
-                    return;
-                }
-
-                // length is not 0
-                let deletionPackage = availablePackages.filter((pkg) => pkg.id === packageId); // get the pkg to be deleted
-
-                if (deletionPackage.length === 0) {
-                    throw new Error("No Package found with specified package id.")
-                }
-
-                // filter out the packages
-                availablePackages = availablePackages.filter((pkg) => pkg.id !== packageId); // filter out docs where id does not match
-
-                destinationData = {...destinationData, packages: availablePackages} // updated the data
-
-
-                // find the package in trending list
-                let trendingPackagesData = trendingPackagesSnapshot.data() as PackageShowcaseDataFile;
-                if (!trendingPackagesData || !trendingPackagesData.entries || trendingPackagesData.entries.length === 0) { // no data in cloud
-                    toast("Package Not detected in Trending List.")
-                }
-
-                trendingPackagesData.entries = trendingPackagesData.entries.filter(
-                    (data) => data.packageId !== packageId && data.destinationId !== destinationId
-                ); // filter and set it again.
-
-
-                // update the new list
-                transaction.update(trendingPackagesRef, {...trendingPackagesData})
-
-
-                transaction.update(destinationRef, {...destinationData})
-            })
+            const res = await fetch(`/api/destinations/${destinationId}/packages/${packageId}`, { method: "DELETE" })
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error ?? "Failed to delete package.")
+            }
 
             toast.success("Package successfully removed.")
             setTimeout(() => {
-                // note: if  success, button will not be re-enabled.
                 router.push('/admin/dashboard');
             }, 3000);
-
 
         } catch (err) {
             console.log(err);
             if (err instanceof Error) toast.error(err.message);
             setIsProcessing(false)
         }
-
-
     }
 
     return (<>

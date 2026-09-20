@@ -1,24 +1,17 @@
 "use client"
 import React, {useEffect, useState} from "react";
 import {toast} from "react-toastify";
-import {doc, runTransaction} from "firebase/firestore";
-import firebase from "../../../../../firebase.ts";
 import {useRouter} from "next/navigation";
 import dynamic from 'next/dynamic';
 import {v4 as uuidv4} from "uuid";
 import {Switch} from '@headlessui/react'
-import axios from "axios";
 import {useSession} from "@/lib/auth-client";
 
 const CkEditorInitialized = dynamic(() => import('@/app/components/CkEditorInitialized'));
 const Footer = dynamic(() => import('@/app/components/Footer'));
 const ToastContainer = dynamic(() => import("react-toastify").then(mod => mod.ToastContainer));
 import {
-    Package,
-    DestinationData,
     PackageReview,
-    TrendingPackageShowcaseData,
-    PackageShowcaseDataFile
 } from "@/app/_utility/types";
 import {Field, Label} from "@headlessui/react";
 
@@ -34,7 +27,6 @@ export default function AddNewPackagePage() {
     const [packageDescription, setPackageDescription] = useState<string>('');
     const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
     const [coverImagePreview, setCoverImagePreview] = useState<string>('');
-    const [coverImageUrl, setCoverImageUrl] = useState<string>('');
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [originalPrice, setOriginalPrice] = useState<number>(0);
     const [discountedPrice, setDiscountedPrice] = useState<number>(0);
@@ -69,7 +61,6 @@ export default function AddNewPackagePage() {
     async function HandlePackageSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-
         if (!destinationId || !packageId || !packageName || !packageDescription || !packageDescription.trim().length || !coverImageFile || !pickUpAndDropSpot || !packageDuration) {
             toast.info('Please fill all required fields correctly.');
             return;
@@ -85,136 +76,50 @@ export default function AddNewPackagePage() {
             return
         }
 
+        setIsProcessing(true)
 
         try {
             toast.info("Uploading image...")
             const formData = new FormData()
             formData.append("file", coverImageFile)
-            const uploadRes = await axios.post("/api/upload", formData)
-            const uploadedUrl = uploadRes.data.url
-            setCoverImageUrl(uploadedUrl)
+            const uploadRes = await fetch("/api/upload", { method: "POST", body: formData })
+            if (!uploadRes.ok) throw new Error("Image upload failed.")
+            const { url: uploadedUrl } = await uploadRes.json()
 
-            // Start transaction
-            await runTransaction(firebase.db, async (transaction) => {
-                // Check if DestinationId is valid and DataItem exists
-                const destinationRef = doc(firebase.db, "destinations", destinationId.toLowerCase());
-                const destinationSnapshot = await transaction.get(destinationRef);
-
-
-
-                if (!destinationSnapshot.exists()) {
-                    throw new Error('No Destination found from given ID.')
-                }
-
-                // get trending-document ref
-                const trendingPackagesRef = doc(firebase.db, "homepage", "trendingPackages");
-                //fetch data
-                const trendingPackagesSnapshot = await transaction.get(trendingPackagesRef);
-
-
-                let destinationData = destinationSnapshot.data() as DestinationData;
-
-                const availablePackages = destinationData.packages as Package[];
-
-                //     check if package already exists with Same ID
-                availablePackages.map((pkg) => {
-                    if (pkg.id === packageId) {
-                        throw new Error("Package with same ID already exists.")
-                    }
-                })
-
-                availablePackages.push({
+            const res = await fetch(`/api/destinations/${destinationId.toLowerCase()}/packages`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
                     id: packageId,
                     name: packageName,
                     coverImageUrl: uploadedUrl,
-                    coverImageFilename: uploadedUrl,
-                    duration: packageDuration,
-                    pickupAndDropLocation: pickUpAndDropSpot,
                     originalPrice: originalPrice,
                     discountedPrice: discountedPrice,
                     description: packageDescription,
+                    duration: packageDuration,
+                    pickupDropLocation: pickUpAndDropSpot,
                     itinerary: itineraryData,
                     inclusions: inclusions,
                     exclusions: exclusions,
-                    coverImageBase64: "",
-                    reviews: reviewsData
-                } as Package)
-
-                destinationData = {
-                    ...destinationData, packages: availablePackages, modified: new Date(), modificationInfo: {
-                        createdBy: session?.user?.email ?? "admin",
-                        lastModifiedBy: session?.user?.email ?? "admin",
-                    }, version: destinationData.version + 1,
-                } // update data locally
-
-                transaction.update(destinationRef, {...destinationData}) // send updated data
-
-
-                // if package needs to be added to trending
-
-                if (!isTrending) return; // if false
-
-                let trendingPackagesData = trendingPackagesSnapshot.data() as PackageShowcaseDataFile;
-                console.log("trendingPackages", trendingPackagesData);
-
-                if (!trendingPackagesData.entries || trendingPackagesData.entries.length === 0) {
-                    trendingPackagesData = {entries: []};
-                    console.log("Entries are null. initialized null values again");
-
-                    trendingPackagesData.entries.push({
-                        packageId: packageId, destinationId: destinationId, addTimestamp: new Date(),
-                    } as TrendingPackageShowcaseData); // push to local array
-
-                    transaction.set(trendingPackagesRef, {...trendingPackagesData}); // set
-                    console.log("Set null value into db");
-                } else {
-                    // Check if the package already exists
-                    const existingIndex = trendingPackagesData.entries.findIndex(data => data.packageId === packageId && data.destinationId === destinationId);
-
-                    if (existingIndex === -1) {
-                        // Before adding a new package, check if the array length is 10 or over
-                        if (trendingPackagesData.entries.length >= 10) {
-                            // Sort the entries by addTimestamp to ensure oldest is first
-                            trendingPackagesData.entries.sort((a, b) => a.addTimestamp.getTime() - b.addTimestamp.getTime());
-
-                            // Remove the oldest elements until the array length is under 10
-                            while (trendingPackagesData.entries.length >= 10) {
-                                trendingPackagesData.entries.shift(); // Removes the first (oldest) element
-                            }
-                        }
-
-                        // Now safe to add the new package
-                        trendingPackagesData.entries.push({
-                            packageId: packageId, destinationId: destinationId, addTimestamp: new Date(),
-                        } as TrendingPackageShowcaseData); // push to local array
-                        console.log("Added new package since it didn't exist.");
-                    } else {
-                        // Package exists, you can update it or leave as is. For now, we'll just log it.
-                        console.log("Package already exists, not adding.");
-                        // If you want to update the timestamp or any other detail, do it here.
-                        // trendingPackagesData.entries[existingIndex].addTimestamp = new Date(); // Example update
-                    }
-
-                    // Update in db
-                    transaction.update(trendingPackagesRef, {...trendingPackagesData}); // update
-                }
+                    reviews: reviewsData,
+                }),
             })
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error ?? "Failed to create package.")
+            }
 
             toast.success("Added a new Package.");
 
             setTimeout(() => {
-                // note: if  success, button will not be re-enabled.
                 router.push('/admin/dashboard');
             }, 3000);
-
 
         } catch (err) {
             console.error(err);
             if (err instanceof Error) toast.error(err.message);
-            setIsProcessing(false) // enable button
+            setIsProcessing(false)
         }
-
-
     }
 
 

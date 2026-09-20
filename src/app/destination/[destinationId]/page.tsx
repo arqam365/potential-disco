@@ -4,8 +4,6 @@ import React, {useEffect} from "react";
 import dynamic from "next/dynamic";
 // import SpinnerFullScreen from "@/app/components/FullScreenSpinner";
 // import ParagraphSkeleton from "@/app/components/ParagraphSkeleton";
-import {doc, getDoc} from "firebase/firestore";
-import firebase from "../../../../firebase.ts";
 import {toast} from "react-toastify";
 import {useRouter} from "next/navigation";
 import {Package, DestinationData} from "@/app/_utility/types";
@@ -45,28 +43,17 @@ export default function Page({params}: { params: { destinationId: string } }) {
     const router = useRouter();
 
     useEffect(() => {
-        const fetchDestinationData = async () => {
-            const docRef = doc(firebase.db, "destinations", params.destinationId);
-            try {
-                const docSnap = await getDoc(docRef);
-                if (!docSnap.exists()) {
-                    console.log('document does not exist')
-                    setError(true);
-                    return;
-                }
-
-                setDestinationData(docSnap.data() as DestinationData);
-                console.log(destinationData)
-            } catch (err) {
-                toast.error('Server Error. CODE 500');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDestinationData().then(_ => {
-        });
-    }, [destinationData, params.destinationId, router]);
+        fetch(`/api/destinations/${params.destinationId}`)
+            .then((res) => {
+                if (!res.ok) { setError(true); return null; }
+                return res.json();
+            })
+            .then((data) => {
+                if (data) setDestinationData(data as DestinationData);
+            })
+            .catch(() => toast.error('Server Error. CODE 500'))
+            .finally(() => setLoading(false));
+    }, [params.destinationId]);
 
     if (loading) {
         return <SpinnerFullScreen/>;

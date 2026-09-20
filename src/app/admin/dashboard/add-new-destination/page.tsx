@@ -1,24 +1,12 @@
 "use client"
 import React, { useEffect, useState } from "react"
 import { toast } from "react-toastify"
-import { doc, getDoc, runTransaction } from "firebase/firestore"
-import firebase from "../../../../../firebase.ts"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
-import { v4 as uuidv4 } from "uuid"
 import { useSession } from "@/lib/auth-client"
-import axios from "axios"
 
 const Footer = dynamic(() => import("@/app/components/Footer"))
 const ToastContainer = dynamic(() => import("react-toastify").then((mod) => mod.ToastContainer))
-
-type SearchListDocument = {
-    entries: {
-        id: string
-        destinationName: string
-        destinationId: string
-    }[]
-}
 
 export default function AddNewDestinationPage() {
     const [destinationId, setDestinationId] = useState<string>("")
@@ -26,7 +14,6 @@ export default function AddNewDestinationPage() {
     const [destinationDescription, setDestinationDescription] = useState<string>("")
     const [coverImageFile, setCoverImageFile] = useState<File | null>(null)
     const [coverImagePreview, setCoverImagePreview] = useState<string>("")
-    const [coverImageUrl, setCoverImageUrl] = useState<string>("")
     const [isProcessing, setIsProcessing] = useState<boolean>(false)
 
     const router = useRouter()
@@ -49,56 +36,41 @@ export default function AddNewDestinationPage() {
         setIsProcessing(true)
 
         try {
-            const docRef = doc(firebase.db, "destinations", destinationId.toLowerCase())
-            const docSnap = await getDoc(docRef)
-            if (docSnap.exists()) {
-                toast.error("A Destination with the same ID already exists.")
-                return
-            }
-
             toast.info("Uploading image...")
             const formData = new FormData()
             formData.append("file", coverImageFile)
-            const uploadRes = await axios.post("/api/upload", formData)
-            const uploadedUrl = uploadRes.data.url
-            setCoverImageUrl(uploadedUrl)
-            const base64 = ""
+            const uploadRes = await fetch("/api/upload", { method: "POST", body: formData })
+            if (!uploadRes.ok) throw new Error("Image upload failed.")
+            const { url: coverImageUrl } = await uploadRes.json()
 
-            const searchListRef = doc(firebase.db, "search", "list")
-            await runTransaction(firebase.db, async (transaction) => {
-                const searchListDoc = await transaction.get(searchListRef)
-
-                let updatedEntries: { id: string; destinationName: string; destinationId: string }[] = []
-                if (searchListDoc.exists()) {
-                    const searchListData = searchListDoc.data() as SearchListDocument
-                    updatedEntries = [...searchListData.entries]
-                }
-
-                updatedEntries.push({
-                    id: uuidv4(),
-                    destinationName: destinationName,
-                    destinationId: destinationId.toLowerCase(),
-                })
-
-                transaction.set(searchListRef, { entries: updatedEntries })
-
-                transaction.set(doc(firebase.db, "destinations", destinationId), {
+            const destRes = await fetch("/api/destinations", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
                     id: destinationId.toLowerCase(),
                     name: destinationName,
                     description: destinationDescription,
-                    coverImageUrl: uploadedUrl,
-                    coverImageBase64: base64,
-                    coverImageFilename: destinationId.toLowerCase(),
-                    packages: [],
-                    created: new Date(),
-                    modified: new Date(),
-                    version: 0,
-                    modificationInfo: {
-                        createdBy: session?.user?.email ?? "admin",
-                        lastModifiedBy: session?.user?.email ?? "admin",
-                    },
-                })
+                    coverImageUrl,
+                }),
             })
+            if (!destRes.ok) {
+                const err = await destRes.json()
+                throw new Error(err.error ?? "Failed to create destination.")
+            }
+
+            const searchRes = await fetch("/api/search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: destinationId.toLowerCase(),
+                    destinationId: destinationId.toLowerCase(),
+                    destinationName: destinationName,
+                }),
+            })
+            if (!searchRes.ok) {
+                const err = await searchRes.json()
+                throw new Error(err.error ?? "Failed to add search entry.")
+            }
 
             toast.success("Destination added successfully.")
             router.push("/admin/dashboard")

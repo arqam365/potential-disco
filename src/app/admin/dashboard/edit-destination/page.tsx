@@ -2,12 +2,9 @@
 
 import React, {useEffect, useState} from "react";
 import {toast} from "react-toastify";
-import {doc, getDoc, updateDoc} from "firebase/firestore";
-import firebase from "../../../../../firebase.ts";
 import {useRouter} from "next/navigation";
 import {DestinationData} from "@/app/_utility/types";
 import dynamic from 'next/dynamic';
-import axios from "axios";
 import {useSession} from "@/lib/auth-client";
 const Footer = dynamic(() => import('@/app/components/Footer'));
 const ToastContainer = dynamic(() => import("react-toastify").then(mod => mod.ToastContainer));
@@ -46,19 +43,15 @@ export default function ModifyDestinationPage() {
                 return
             }
 
-            // check if data exists
-            const docRef = doc(firebase.db, "destinations", searchId.toLowerCase());
-            const docSnap = await getDoc(docRef);
-            if (!docSnap.exists()) {
+            const res = await fetch(`/api/destinations/${searchId.toLowerCase()}`)
+            if (!res.ok) {
                 toast.error('Invalid ID or Entry does not exist in Database.');
                 setIsProcessing(false);
                 return
             }
 
-            // if data exists
-            const destinationDataSnapshot: DestinationData = docSnap.data() as DestinationData;
+            const destinationDataSnapshot: DestinationData = await res.json()
             setFetchedData(destinationDataSnapshot)
-            console.log(destinationDataSnapshot)
 
             setDestinationId(destinationDataSnapshot.id);
             setDestinationName(destinationDataSnapshot.name);
@@ -67,15 +60,12 @@ export default function ModifyDestinationPage() {
 
             setIsProcessing(false);
 
-
         } catch (err) {
             console.log(err);
             setIsProcessing(false);
             if (err instanceof Error) return toast.error(err.message)
             return toast.error("An Unknown Error occurred. Please try again.");
         }
-
-
     }
 
 
@@ -87,7 +77,7 @@ export default function ModifyDestinationPage() {
             return;
         }
 
-        setIsProcessing(true) // disable button
+        setIsProcessing(true)
 
         let downloadUrl = coverImageUrl
 
@@ -95,8 +85,10 @@ export default function ModifyDestinationPage() {
             toast.info("Uploading image...")
             const formData = new FormData()
             formData.append("file", newCoverImageFile)
-            const uploadRes = await axios.post("/api/upload", formData)
-            downloadUrl = uploadRes.data.url
+            const uploadRes = await fetch("/api/upload", { method: "POST", body: formData })
+            if (!uploadRes.ok) throw new Error("Image upload failed.")
+            const { url } = await uploadRes.json()
+            downloadUrl = url
         }
 
         if (!fetchedData) {
@@ -105,39 +97,31 @@ export default function ModifyDestinationPage() {
             return
         }
 
-        const updatedDocument = {
-            ...fetchedData,
-            name: destinationName,
-            description: destinationDescription,
-            coverImageUrl: downloadUrl,
-            coverImageFilename: newCoverImageFile ? downloadUrl : fetchedData.coverImageFilename,
-            coverImageBase64: newCoverImageFile ? "" : fetchedData.coverImageBase64,
-            version: fetchedData.version + 1,
-            fileName: newCoverImageFile ? downloadUrl : fetchedData.coverImageFilename,
-
-            modified: new Date(),
-            modificationInfo: {
-                createdBy: session?.user?.email ?? "admin",
-                lastModifiedBy: session?.user?.email ?? "admin",
-            }
-        };
-
         try {
-            // uploaded information
-            await updateDoc(doc(firebase.db, "destinations", destinationId), updatedDocument);
+            const res = await fetch(`/api/destinations/${destinationId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: destinationName,
+                    description: destinationDescription,
+                    coverImageUrl: downloadUrl,
+                }),
+            })
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error ?? "Failed to update destination.")
+            }
 
             toast.success('Data Updated successfully.');
 
             setTimeout(() => {
-                // note: if  success, button will not be re-enabled.
                 router.push('/admin/dashboard');
             }, 3000);
-
 
         } catch (err) {
             console.error(err);
             if (err instanceof Error) toast.error(err.message);
-            setIsProcessing(false) // enable button
+            setIsProcessing(false)
         }
     }
 

@@ -2,41 +2,31 @@
 import React, {useEffect, useState} from "react";
 import Slider from "react-slick";
 import dynamic from "next/dynamic";
-import {doc, getDoc} from "firebase/firestore";
-import firebase from "../../../firebase.ts";
-import {TestimonialFile} from "@/app/_utility/types";
 import ParagraphSkeleton from "@/app/components/ParagraphSkeleton";
 
 const Testimonial = dynamic(() => import("./Testimonial"));
 
 
 
-
+type Testimonial = { id: string; imageSrc: string; name: string; content: string; authorPosition: string };
 
 const SimpleSlider: React.FC = () => {
-    const [testimonialFileData, setTestimonialFileData] = useState<TestimonialFile>();
+    const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isErr, setIsErr] = useState(false);
 
     useEffect(() => {
-        try {
-            const testimonialsFileRef = doc(firebase.db, "homepage", 'testimonials');
-            getDoc(testimonialsFileRef).then((snapShot) => {
-                const data = snapShot.data() as TestimonialFile;
-                if (!data.entries || data.entries.length === 0) {
-                    setIsErr(true);
-                }
-                setTestimonialFileData(data);
+        fetch("/api/testimonials")
+            .then((res) => res.json())
+            .then((data: Testimonial[]) => {
+                if (!data || data.length === 0) setIsErr(true);
+                setTestimonials(data);
                 setIsLoading(false);
             })
-        } catch (err) {
-            setIsErr(true);
-        } finally {
-            setIsLoading(false);
-        }
-
-
-
+            .catch(() => {
+                setIsErr(true);
+                setIsLoading(false);
+            });
     }, []);
 
 
@@ -59,15 +49,13 @@ const SimpleSlider: React.FC = () => {
 
     if (isLoading) return (<ParagraphSkeleton />)
     if (isErr) return (<> Warning! Testimonials Not detected.</>)
-    if (testimonialFileData) return (
+    if (testimonials.length > 0) return (
         <section id={'testimonials'} className={'w-full '}>
             <Slider {...settings}>
-                {testimonialFileData.entries.map((entry, i) => {
-                    return (
-                        <Testimonial name={entry.name} content={entry.content} authorPosition={entry.authorPosition}
-                                     imageSrc={entry.imageSrc} key={i}/>
-                    );
-                })}
+                {testimonials.map((entry, i) => (
+                    <Testimonial name={entry.name} content={entry.content} authorPosition={entry.authorPosition}
+                                 imageSrc={entry.imageSrc} key={i}/>
+                ))}
             </Slider>
         </section>
     );

@@ -3,8 +3,6 @@ import dynamic from "next/dynamic";
 import React, {useEffect} from "react";
 // import SpinnerFullScreen from "@/app/components/FullScreenSpinner";
 // import ParagraphSkeleton from "@/app/components/ParagraphSkeleton";
-import {doc, getDoc} from "firebase/firestore";
-import firebase from "../../../../../../firebase.ts";
 import {toast} from "react-toastify";
 import {useRouter} from "next/navigation";
 // import Err404 from "@/app/404/page";
@@ -57,42 +55,20 @@ export default function Page({params}: { params: { destinationId: string, packag
     const router = useRouter();
 
     useEffect(() => {
-
-        const fetchDestinationData = async () => {
-
-            const docRef = doc(firebase.db, "destinations", params.destinationId); // firebase doc ref
-
-            try {
-                const docSnap = await getDoc(docRef);
-
-                if (!docSnap.exists()) { // check existence
-                    console.log('document does not exist')
-                    setError(true);
-                    return;
-                }
-
-                setDestinationData(docSnap.data() as DestinationData);
-
-                // filter
-                const fetchedPackage = (docSnap.data() as DestinationData).packages.filter((pkg) => pkg.id === params.packageId)
-                if (fetchedPackage.length === 0) {
-                    setLoading(false)
-                    setError(true);
-                }
-
-                setPackageData(fetchedPackage[0]);
-
-                setLoading(false); // remove loading screen
-
-            } catch (err) {
-                toast.error('Server Error. CODE 500'); // handle unexpected errors
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDestinationData().then(_ => {}); // use async function in callback
-    }, [params.destinationId, params.packageId, router]);
+        fetch(`/api/destinations/${params.destinationId}/packages/${params.packageId}`)
+            .then((res) => {
+                if (!res.ok) { setError(true); return null; }
+                return res.json();
+            })
+            .then((data) => {
+                if (!data) return;
+                setPackageData(data as Package);
+                // destination stub so layout checks (destinationData?.packages?.length) still work
+                setDestinationData({ id: params.destinationId, packages: [data] } as unknown as DestinationData);
+            })
+            .catch(() => toast.error('Server Error. CODE 500'))
+            .finally(() => setLoading(false));
+    }, [params.destinationId, params.packageId]);
 
 
     // show loading screen

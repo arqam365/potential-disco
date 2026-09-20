@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { doc, runTransaction } from "firebase/firestore";
-import firebase from "../../../../../firebase.ts";
 import { useRouter } from "next/navigation";
 import dynamic from 'next/dynamic';
 import { v4 as uuidv4 } from "uuid";
@@ -11,10 +9,7 @@ import {
     Package,
     DestinationData,
     PackageReview,
-    TrendingPackageShowcaseData,
-    PackageShowcaseDataFile
 } from "@/app/_utility/types";
-import axios from "axios";
 import {Field, Label, Switch} from "@headlessui/react";
 import {useSession} from "@/lib/auth-client";
 
@@ -82,51 +77,45 @@ export default function ModifyDestinationPage() {
             return;
         }
 
-        setIsProcessing(true) // disable button
+        setIsProcessing(true)
 
         try {
-            // start transaction
-            await runTransaction(firebase.db, async (transaction) => {
-                // get destination document
-                const destinationRef = doc(firebase.db, "destinations", destinationId);
-                const destinationSnapshot = await transaction.get(destinationRef);
+            const res = await fetch(`/api/destinations/${destinationId}`)
+            if (!res.ok) {
+                setIsProcessing(false);
+                throw new Error("No Destination Found using the given ID");
+            }
 
-                if (!destinationSnapshot.exists()) { // if it does not exist
-                    setIsProcessing(false);
-                    throw new Error("No Destination Found using the given ID");
-                }
+            const destinationData: DestinationData = await res.json()
+            const availablePackages = destinationData.packages
 
-                let destinationData = destinationSnapshot.data() as DestinationData;
-                let availablePackages = destinationData.packages;
+            if (availablePackages.length === 0) {
+                toast.info("This destinations has no packages.");
+                setIsProcessing(false);
+                return;
+            }
 
-                if (availablePackages.length === 0) { // if length is 0
-                    toast.info("This destinations has no packages.");
-                    return;
-                }
+            const searchedPackage = availablePackages.filter((pkg) => pkg.id === packageId)
 
-                // length is not 0
-                let searchedPackage = availablePackages.filter((pkg) => pkg.id === packageId); // get the pkg to be deleted
+            if (searchedPackage.length === 0) {
+                throw new Error("No Package found with specified package id.")
+            }
 
-                if (searchedPackage.length === 0) {
-                    throw new Error("No Package found with specified package id.")
-                }
+            setFetchedPackageData(searchedPackage[0]);
+            setFetchedDestinationData(destinationData);
 
-                setFetchedPackageData(searchedPackage[0]);
-                setFetchedDestinationData(destinationData);
-
-                setPackageName(searchedPackage[0].name)
-                setPackageDescription(searchedPackage[0].description)
-                setOriginalPrice(searchedPackage[0].originalPrice)
-                setDiscountedPrice(searchedPackage[0].discountedPrice)
-                setItineraryData(searchedPackage[0].itinerary)
-                setInclusions(searchedPackage[0].inclusions)
-                setExclusions(searchedPackage[0].exclusions)
-                setPackageDuration(searchedPackage[0].duration)
-                setPickUpAndDropSpot(searchedPackage[0].pickupAndDropLocation)
-                setReviewsData(searchedPackage[0].reviews)
-                setCoverImageUrl(searchedPackage[0].coverImageUrl)
-                setIsProcessing(false) // enable buttons
-            })
+            setPackageName(searchedPackage[0].name)
+            setPackageDescription(searchedPackage[0].description)
+            setOriginalPrice(searchedPackage[0].originalPrice)
+            setDiscountedPrice(searchedPackage[0].discountedPrice)
+            setItineraryData(searchedPackage[0].itinerary)
+            setInclusions(searchedPackage[0].inclusions)
+            setExclusions(searchedPackage[0].exclusions)
+            setPackageDuration(searchedPackage[0].duration)
+            setPickUpAndDropSpot(searchedPackage[0].pickupAndDropLocation)
+            setReviewsData(searchedPackage[0].reviews)
+            setCoverImageUrl(searchedPackage[0].coverImageUrl)
+            setIsProcessing(false)
         } catch (err) {
             console.log(err);
             if (err instanceof Error) toast.error(err.message);
@@ -157,124 +146,48 @@ export default function ModifyDestinationPage() {
         setIsProcessing(true)
         try {
             let finalCoverImageUrl = coverImageUrl
-            let base64 = fetchedPackageData.coverImageBase64
             if (newCoverImageFile) {
                 toast.info("Uploading image...")
                 const formData = new FormData()
                 formData.append("file", newCoverImageFile)
-                const uploadRes = await axios.post("/api/upload", formData)
-                finalCoverImageUrl = uploadRes.data.url
-                base64 = ""
+                const uploadRes = await fetch("/api/upload", { method: "POST", body: formData })
+                if (!uploadRes.ok) throw new Error("Image upload failed.")
+                const { url } = await uploadRes.json()
+                finalCoverImageUrl = url
             }
 
-            // update the package
-            if (!fetchedPackageData) {
-                throw new Error("Tried to update details before fetching. This is a bug. Please report.")
-            }
-
-            await runTransaction(firebase.db, async (transaction) => {
-
-                // get trending-document ref
-                const trendingPackagesRef = doc(firebase.db, "homepage", "trendingPackages");
-                //fetch data
-                const trendingPackagesSnapshot = await transaction.get(trendingPackagesRef);
-
-                // all reads before write
-
-                // filter the array of packages
-                let filteredPackages = fetchedDestinationData?.packages.filter((pkg) => pkg.id !== packageId) || [];
-
-                // updated package
-                const updatedPackageData = {
-                    ...fetchedPackageData,
+            const res = await fetch(`/api/destinations/${destinationId}/packages/${packageId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
                     name: packageName,
                     description: packageDescription,
                     duration: packageDuration,
-                    pickupAndDropLocation: pickUpAndDropSpot,
+                    pickupDropLocation: pickUpAndDropSpot,
                     coverImageUrl: finalCoverImageUrl,
-                    coverImageFilename: finalCoverImageUrl,
-                    coverImageBase64: base64,
                     originalPrice: originalPrice,
                     discountedPrice: discountedPrice,
                     itinerary: itineraryData,
                     inclusions: inclusions,
                     exclusions: exclusions,
-                    reviews: reviewsData || []
-                } as Package;
-
-                console.log(updatedPackageData)
-
-
-                // push updated package into filtered packages
-                filteredPackages.push(updatedPackageData);
-
-                const destinationRef = doc(firebase.db, "destinations", destinationId);
-                transaction.update(destinationRef, {
-                    ...fetchedDestinationData, packages: filteredPackages
-                })
-
-                if (!isTrending) return;
-
-                let trendingPackagesData = trendingPackagesSnapshot.data() as PackageShowcaseDataFile;
-
-                if (!trendingPackagesData.entries || trendingPackagesData.entries.length === 0) {
-                    trendingPackagesData = {entries: []};
-
-                    trendingPackagesData.entries.push({
-                        packageId: packageId, destinationId: destinationId, addTimestamp: new Date(),
-                    } as TrendingPackageShowcaseData); // push to local array
-
-                    transaction.set(trendingPackagesRef, {...trendingPackagesData}); // set
-
-                } else {
-                    // Check if the package already exists
-                    const existingIndex = trendingPackagesData.entries.findIndex(data => data.packageId === packageId && data.destinationId === destinationId);
-
-                    if (existingIndex === -1) {
-                        // Before adding a new package, check if the array length is 10 or over
-                        if (trendingPackagesData.entries.length >= 10) {
-                            // Sort the entries by addTimestamp to ensure oldest is first
-                            trendingPackagesData.entries.sort((a, b) => a.addTimestamp.getTime() - b.addTimestamp.getTime());
-
-                            // Remove the oldest elements until the array length is under 10
-                            while (trendingPackagesData.entries.length >= 10) {
-                                trendingPackagesData.entries.shift(); // Removes the first (oldest) element
-                            }
-                        }
-
-                        // Now safe to add the new package
-                        trendingPackagesData.entries.push({
-                            packageId: packageId, destinationId: destinationId, addTimestamp: new Date(),
-                        } as TrendingPackageShowcaseData); // push to local array
-                        console.log("Added new package since it didn't exist.");
-                    } else {
-                        // Package exists, you can update it or leave as is. For now, we'll just log it.
-                        console.log("Package already exists, not adding.");
-                        // If you want to update the timestamp or any other detail, do it here.
-                        // trendingPackagesData.entries[existingIndex].addTimestamp = new Date(); // Example update
-                    }
-
-                    // Update in db
-                    transaction.update(trendingPackagesRef, {...trendingPackagesData}); // update
-                }
-
-                // complete
-
+                    reviews: reviewsData || [],
+                }),
             })
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error ?? "Failed to update package.")
+            }
 
             toast.success('Updated Successfully.');
 
-            // note: if  success, button will not be re-enabled.
             setTimeout(() => {
-                // note: if  success, button will not be re-enabled.
                 router.push('/admin/dashboard');
             }, 3000);
-
 
         } catch (err) {
             console.error(err);
             if (err instanceof Error) toast.error(err.message);
-            setIsProcessing(false) // enable button
+            setIsProcessing(false)
         }
     }
 

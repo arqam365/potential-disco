@@ -1,7 +1,4 @@
 import React, {useCallback, useEffect, useState} from "react";
-import { doc, getDoc, runTransaction } from "firebase/firestore";
-import firebase from "../../../firebase.ts";
-import { DestinationData, Package, PackageShowcaseDataFile } from "@/app/_utility/types";
 import Image from 'next/image';
 
 import { EmblaOptionsType, EmblaCarouselType } from 'embla-carousel'
@@ -57,13 +54,16 @@ const PackageComponent: React.FC<PackageProps> = ({blurDataURL, coverImageUrl, d
     );
 };
 
-interface UpdatedPackage extends Package {
-    destinationName: string,
-    parentDestinationId: string,
-}
+type TrendingItem = {
+    id: string;
+    destinationId: string;
+    packageId: string;
+    package: { id: string; name: string; coverImageUrl: string; duration: string };
+    destination: { id: string; name: string };
+};
 
 const SimpleSlider: React.FC = () => {
-    const [packagesData, setPackagesData] = useState<UpdatedPackage[]>([]);
+    const [packagesData, setPackagesData] = useState<TrendingItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [emblaRef, emblaApi] = useEmblaCarousel(OPTIONS, [Autoplay()])
@@ -98,53 +98,17 @@ const SimpleSlider: React.FC = () => {
 
 
     useEffect(() => {
-        const fetchData = async () => {
-            const trendingPackagesDocRef = doc(firebase.db, "homepage", "trendingPackages");
-
-            try {
-                await runTransaction(firebase.db, async (transaction) => {
-                    const docSnapshot = await getDoc(trendingPackagesDocRef);
-
-                    if (!docSnapshot.exists()) {
-                        setPackagesData([]);
-                        setLoading(false);
-                        return;
-                    }
-
-                    const data = docSnapshot.data() as PackageShowcaseDataFile;
-
-                    if (!data || !data.entries || data.entries.length === 0) {
-                        setPackagesData([]);
-                        setLoading(false);
-                        return;
-                    }
-
-                    const pkgDataReferences: UpdatedPackage[] = [];
-
-                    await Promise.all(
-                        data.entries.map(async (pkgData) => {
-                            const pkgDestinationRef = doc(firebase.db, "destinations", pkgData.destinationId);
-                            const pkgDestinationSnapShot = await transaction.get(pkgDestinationRef);
-                            const pkgDestinationData = pkgDestinationSnapShot.data() as DestinationData;
-
-                            const filteredPkg = pkgDestinationData.packages.find((pkg) => pkg.id === pkgData.packageId);
-                            if (filteredPkg) {
-                                pkgDataReferences.push({...filteredPkg, destinationName: pkgDestinationData.name, parentDestinationId: pkgDestinationData.id} as UpdatedPackage);
-                            }
-                        })
-                    );
-
-                    setPackagesData(pkgDataReferences);
-                    setLoading(false);
-                });
-            } catch (err) {
+        fetch("/api/trending")
+            .then((res) => res.json())
+            .then((data: TrendingItem[]) => {
+                setPackagesData(data ?? []);
+                setLoading(false);
+            })
+            .catch((err) => {
                 console.error("Error fetching data:", err);
                 setError(true);
                 setLoading(false);
-            }
-        };
-
-        fetchData().then();
+            });
     }, []);
 
     return (
@@ -159,11 +123,16 @@ const SimpleSlider: React.FC = () => {
                     <section className="embla lg:scale-[140%] ">
                         <div className="embla__viewport" ref={emblaRef}>
                             <div className="lg:mt-8 embla__container">
-                                {packagesData.map((SlideDataElement, index) => (
+                                {packagesData.map((item, index) => (
                                     <div className="embla__slide" key={index}>
-                                        {/*<div className="embla__slide__number">{index + 1}</div>*/}
-                                        <PackageComponent destinationId={SlideDataElement.parentDestinationId} packageId={SlideDataElement.id}  blurDataURL={SlideDataElement.coverImageBase64} packageDestination={SlideDataElement.name} duration={SlideDataElement.duration} coverImageUrl={SlideDataElement.coverImageUrl} />
-
+                                        <PackageComponent
+                                            destinationId={item.destination?.id ?? item.destinationId}
+                                            packageId={item.packageId}
+                                            blurDataURL=""
+                                            packageDestination={item.package.name}
+                                            duration={item.package.duration}
+                                            coverImageUrl={item.package.coverImageUrl}
+                                        />
                                     </div>
                                 ))}
                             </div>

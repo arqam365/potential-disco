@@ -1,17 +1,25 @@
 "use client"
 import React, {useEffect, useState} from "react";
 import {toast} from "react-toastify";
-import {doc, getDoc, runTransaction} from "firebase/firestore";
-import firebase from "../../../../../firebase.ts";
 import {useRouter} from "next/navigation";
 
 import dynamic from 'next/dynamic';
-import {PackageShowcaseDataFile, searchListDocument} from '@/app/_utility/types';
 import {useSession} from "@/lib/auth-client";
 const Footer = dynamic(() => import('@/app/components/Footer'));
 const ToastContainer = dynamic(() => import("react-toastify").then(mod => mod.ToastContainer));
 
-import {DestinationData} from "@/app/_utility/types";
+interface Package {
+    id: string
+    name: string
+}
+
+interface DestinationData {
+    id: string
+    name: string
+    description: string
+    coverImageUrl: string
+    packages: Package[]
+}
 
 
 export default function ModifyDestinationPage() {
@@ -45,19 +53,15 @@ export default function ModifyDestinationPage() {
                 return
             }
 
-            // check if data exists
-            const docRef = doc(firebase.db, "destinations", searchId.toLowerCase());
-            const docSnap = await getDoc(docRef);
-            if (!docSnap.exists()) {
+            const res = await fetch(`/api/destinations/${searchId.toLowerCase()}`)
+            if (!res.ok) {
                 toast.error('Invalid ID or Entry does not exist in Database.');
                 setIsProcessing(false);
                 return
             }
 
-            // if data exists
-            const destinationDataSnapshot: DestinationData = docSnap.data() as DestinationData;
+            const destinationDataSnapshot: DestinationData = await res.json()
             setFetchedData(destinationDataSnapshot)
-            console.log(destinationDataSnapshot)
 
             setDestinationId(destinationDataSnapshot.id);
             setDestinationName(destinationDataSnapshot.name);
@@ -66,20 +70,17 @@ export default function ModifyDestinationPage() {
 
             setIsProcessing(false);
 
-
         } catch (err) {
             console.log(err);
             setIsProcessing(false);
             if (err instanceof Error) return toast.error(err.message)
             return toast.error("An Unknown Error occurred. Please try again.");
         }
-
-
     }
 
     async function handleDestinationUpdate(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        setIsProcessing(true); // disable button
+        setIsProcessing(true);
 
         if (!fetchedData) {
             toast.error("The delete function was launched before initial data fetched. This isn't ideal, Please make a report for this Bug.");
@@ -88,38 +89,11 @@ export default function ModifyDestinationPage() {
         }
 
         try {
-            const destinationDocRef = doc(firebase.db, "destinations", destinationId);
-            const destinationDocSnapshot = await getDoc(destinationDocRef);
-            const fetchedDestinationData = destinationDocSnapshot.data() as DestinationData;
-
-            const trendingPackagesRef = doc(firebase.db, "homepage", "trendingPackages");
-            const trendingPackagesSnapshot = await getDoc(trendingPackagesRef);
-            const trendingPackagesData = trendingPackagesSnapshot.data() as PackageShowcaseDataFile;
-
-            const searchListRef = doc(firebase.db, "search", "list");
-            const searchListSnapshot = await getDoc(searchListRef);
-            const searchListData = searchListSnapshot.data() as searchListDocument;
-
-            await runTransaction(firebase.db, async (transaction) => {
-                // Update trending packages
-                if (trendingPackagesData && trendingPackagesData.entries) {
-                    trendingPackagesData.entries = trendingPackagesData.entries.filter(
-                        (data) => data.destinationId !== destinationId
-                    );
-                    transaction.set(trendingPackagesRef, trendingPackagesData);
-                }
-
-                // Update search list
-                if (searchListData && searchListData.entries) {
-                    searchListData.entries = searchListData.entries.filter(
-                        (entry) => entry.destinationId !== destinationId
-                    );
-                    transaction.update(searchListRef, {...searchListData});
-                }
-
-                // Delete destination document
-                transaction.delete(destinationDocRef);
-            });
+            const res = await fetch(`/api/destinations/${destinationId}`, { method: "DELETE" })
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error ?? "Failed to delete destination.")
+            }
 
             toast.success('Data deleted successfully.');
 
@@ -130,7 +104,7 @@ export default function ModifyDestinationPage() {
         } catch (err) {
             console.error(err);
             if (err instanceof Error) toast.error(err.message);
-            setIsProcessing(false); // enable button
+            setIsProcessing(false);
         }
     }
 
